@@ -24,6 +24,12 @@ func New(host string, port int, options ...Option) *Server {
 	}
 	return svr
 }
+func (s *Server) Start() error {
+	if s.logger != nil {
+		s.logger.Println("server started")
+	}
+	return nil
+}
 
 func WithTimeout(timeout time.Duration) func(*Server) {
 	return func(s *Server) {
