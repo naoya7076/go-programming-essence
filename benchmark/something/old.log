@@ -1,0 +1,11 @@
+goos: darwin
+goarch: arm64
+pkg: my-app/benchmark/something
+BenchmarkMakeSomething-8   	   19141	     63307 ns/op	   57155 B/op	    1755 allocs/op
+BenchmarkMakeSomething-8   	   19120	     63180 ns/op	   57155 B/op	    1755 allocs/op
+BenchmarkMakeSomething-8   	   18172	     61937 ns/op	   57155 B/op	    1755 allocs/op
+BenchmarkMakeSomething-8   	   19101	     65707 ns/op	   57155 B/op	    1755 allocs/op
+BenchmarkMakeSomething-8   	   19230	     62546 ns/op	   57155 B/op	    1755 allocs/op
+BenchmarkMakeSomething-8   	   19071	     63054 ns/op	   57155 B/op	    1755 allocs/op
+PASS
+ok  	my-app/benchmark/something	11.126s
