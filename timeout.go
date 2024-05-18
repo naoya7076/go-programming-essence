@@ -26,14 +26,24 @@ func generator(ctx context.Context, num int) <-chan int {
 		}
 
 		close(out)
+		userID, authToken, traceID := ctx.Value("userID").(int), ctx.Value("autoToken").(string), ctx.Value("traceID").(int)
+		fmt.Println("log: ", userID, authToken, traceID)
 		fmt.Println("generator closed")
 	}()
 	return out
 }
 
 func main() {
-	// doneチャネルがcloseされたらキャンセル
+	type contextKey string
+	const (
+		userIDKey    contextKey = "userID"
+		authTokenKey contextKey = "authToken"
+		traceIDKey   contextKey = "traceID"
+	)
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second))
+	ctx = context.WithValue(ctx, userIDKey, 2)
+	ctx = context.WithValue(ctx, authTokenKey, "xxxxx")
+	ctx = context.WithValue(ctx, traceIDKey, 3)
 	gen := generator(ctx, 1)
 
 	wg.Add(1)
