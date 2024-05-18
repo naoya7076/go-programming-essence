@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -15,14 +16,15 @@ func generator(ctx context.Context, num int) <-chan int {
 	go func() {
 		defer wg.Done()
 
-	LOOP:
-		for {
-			select {
-			case <-ctx.Done(): // doneチャネルがcloseされたらbreakが実行される
-				break LOOP
-				// case out <- num: これが時間がかかっているという想定
-			}
+		<-ctx.Done()
+		if err := ctx.Err(); errors.Is(err, context.Canceled) {
+			// キャンセルされていた場合
+			fmt.Println("canceled")
+		} else if errors.Is(err, context.DeadlineExceeded) {
+			// タイムアウトだった場合
+			fmt.Println("deadline")
 		}
+
 		close(out)
 		fmt.Println("generator closed")
 	}()
