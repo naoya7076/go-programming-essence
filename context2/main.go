@@ -16,23 +16,17 @@ func main() {
 		go func(ctx2 context.Context) {
 			// G2-2
 			go func(ctx2 context.Context) {
-				select {
-				case <-ctx2.Done():
-					fmt.Println("G2-2 canceled")
-				}
+				<-ctx2.Done()
+				fmt.Println("G2-2 canceled")
 			}(ctx2)
 
-			select {
-			case <-ctx2.Done():
-				fmt.Println("G2-1 canceled")
-			}
+			<-ctx2.Done()
+			fmt.Println("G2-1 canceled")
 		}(ctx2)
 		cancel2()
 
-		select {
-		case <-ctx1.Done():
-			fmt.Println("G1 canceled")
-		}
+		<-ctx1.Done()
+		fmt.Println("G1 canceled")
 	}(ctx1)
 	time.Sleep(time.Second)
 }
