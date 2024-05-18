@@ -10,6 +10,10 @@ import (
 
 var wg sync.WaitGroup
 
+type userIDKey struct{}
+type authTokenKey struct{}
+type traceIDKey struct{}
+
 // キャンセルされるまでnumをひたすら送信し続けるチャネルを生成
 func generator(ctx context.Context, num int) <-chan int {
 	out := make(chan int)
@@ -26,7 +30,7 @@ func generator(ctx context.Context, num int) <-chan int {
 		}
 
 		close(out)
-		userID, authToken, traceID := ctx.Value("userID").(int), ctx.Value("autoToken").(string), ctx.Value("traceID").(int)
+		userID, authToken, traceID := ctx.Value(userIDKey{}).(int), ctx.Value(authTokenKey{}).(string), ctx.Value(traceIDKey{}).(int)
 		fmt.Println("log: ", userID, authToken, traceID)
 		fmt.Println("generator closed")
 	}()
@@ -34,16 +38,10 @@ func generator(ctx context.Context, num int) <-chan int {
 }
 
 func main() {
-	type contextKey string
-	const (
-		userIDKey    contextKey = "userID"
-		authTokenKey contextKey = "authToken"
-		traceIDKey   contextKey = "traceID"
-	)
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second))
-	ctx = context.WithValue(ctx, userIDKey, 2)
-	ctx = context.WithValue(ctx, authTokenKey, "xxxxx")
-	ctx = context.WithValue(ctx, traceIDKey, 3)
+	ctx = context.WithValue(ctx, userIDKey{}, 2)
+	ctx = context.WithValue(ctx, authTokenKey{}, "xxxxx")
+	ctx = context.WithValue(ctx, traceIDKey{}, 3)
 	gen := generator(ctx, 1)
 
 	wg.Add(1)
