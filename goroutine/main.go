@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"sync"
 )
 
 func main() {
@@ -30,4 +32,58 @@ func main() {
 	// }
 	// time.Sleep(time.Second)
 	fmt.Println(dst)
+}
+
+// 拘束パターン
+func restFunc() <-chan int {
+	result := make(chan int)
+	go func() {
+		defer close(result)
+
+		for i := 0; i < 5; i++ {
+			result <- 1
+		}
+	}()
+	return result
+}
+
+// select文
+func selectStatement() {
+	gen1, gen2 := make(chan int), make(chan int)
+	select {
+	case num := <-gen1:
+		fmt.Println(num)
+	case num := <-gen2:
+		fmt.Println(num)
+	default:
+		fmt.Println("neither chan cannot use")
+	}
+}
+
+func fanIn2(ctx context.Context, cs ...<-chan int) <-chan int {
+	result := make(chan int)
+
+	var wg sync.WaitGroup
+	wg.Add(len(cs))
+	for i, c := range cs {
+		// FanInの対象になるチャネルごとに個別にゴールーチンを立てる
+		go func(c <-chan int, i int) {
+			defer wg.Done()
+			for num := range c {
+				select {
+				case <-ctx.Done():
+					fmt.Println("wg.Done", i)
+					return
+				case result <- num:
+					fmt.Println("send", i)
+				}
+			}
+		}(c, i)
+	}
+	go func() {
+		wg.Wait()
+		fmt.Println("closing fanIn")
+		close(result)
+	}()
+	return result
 }
