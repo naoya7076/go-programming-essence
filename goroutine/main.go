@@ -2,26 +2,32 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 )
 
-func getLuckyNum(c chan<- int) {
-	fmt.Println("...")
-	r := rand.New(rand.NewSource(time.Now().Unix()))
-	time.Sleep(time.Duration(r.Intn(3000)) * time.Millisecond)
-
-	num := r.Intn(10)
-	c <- num
-}
-
 func main() {
-	fmt.Println("what is today's lucky number?")
-
+	src := []int{1, 2, 3, 4, 5}
+	dst := []int{}
 	c := make(chan int)
-	go getLuckyNum(c)
-	num := <-c
-	fmt.Printf("Today's your lucky number is %d!\n", num)
+	for _, s := range src {
+		go func(s int) {
+			result := s * 2
+			c <- result
+		}(s)
+	}
+	for range src {
+		num := <-c
+		dst = append(dst, num)
+	}
 
-	close(c)
+	// var mu sync.Mutex
+	// for _, s := range src {
+	// 	go func(s int) {
+	// 		result := s * 2
+	// 		mu.Lock()
+	// 		dst = append(dst, result)
+	// 		mu.Unlock()
+	// 	}(s)
+	// }
+	// time.Sleep(time.Second)
+	fmt.Println(dst)
 }
