@@ -1,20 +1,27 @@
 package main
 
 import (
-	"sync"
+	"fmt"
+	"math/rand"
 	"time"
 )
 
-func doSomething(wg *sync.WaitGroup) {
-	defer wg.Done()
-	time.Sleep(100 * time.Second)
+func getLuckyNum(c chan<- int) {
+	fmt.Println("...")
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	time.Sleep(time.Duration(r.Intn(3000)) * time.Millisecond)
+
+	num := r.Intn(10)
+	c <- num
 }
 
 func main() {
-	var wg sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go doSomething(&wg)
-	}
-	wg.Wait()
+	fmt.Println("what is today's lucky number?")
+
+	c := make(chan int)
+	go getLuckyNum(c)
+	num := <-c
+	fmt.Printf("Today's your lucky number is %d!\n", num)
+
+	close(c)
 }
