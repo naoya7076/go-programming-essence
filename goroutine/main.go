@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -87,3 +88,28 @@ func fanIn2(ctx context.Context, cs ...<-chan int) <-chan int {
 	}()
 	return result
 }
+
+func ticker() {
+	t := time.NewTicker(time.Millisecond * 100)
+	defer t.Stop()
+	for i := 0; i < 5; i++ {
+		<-t.C
+		fmt.Println("tick")
+	}
+}
+
+func Query(conns []Conn, query string) Result {
+	ch := make(chan Result, len(conns))
+
+	for _, conn := range conns {
+		go func(c Conn) {
+			ch <- c.DoQuery(query)
+		}(conn)
+	}
+	return <-ch
+}
+
+// func main() {
+// 	result := Query(conns, query)
+// 	fmt.Println(result)
+// }
